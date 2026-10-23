@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 610" role="img" aria-label="三亚海岸路线示意图">
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#4881bb"/><stop offset=".55" stop-color="#8ec5e7"/><stop offset="1" stop-color="#dbeaf5"/></linearGradient>
+    <linearGradient id="sea" x2="0" y2="1"><stop stop-color="#5a9ab8"/><stop offset="1" stop-color="#41718d"/></linearGradient>
+    <linearGradient id="statue" x2="0" y2="1"><stop stop-color="#eeeae0"/><stop offset=".65" stop-color="#d7d5ce"/><stop offset="1" stop-color="#aaaeb0"/></linearGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="8"/></filter>
+  </defs>
+  <path fill="url(#sky)" d="M0 0h480v610H0z"/>
+  <g opacity=".32" fill="#fff" filter="url(#soft)"><path d="M-30 90q80-50 154-4t152 1q73-34 180 3v37H-30z"/><path d="M102 180q58-40 110-12t100 2q75-24 171 16v28H102z"/><path d="M-35 256q80-38 175-3t175-15q72-24 160 25v31H-35z"/></g>
+  <path d="M0 429q117-25 232-4t248-7v192H0z" fill="url(#sea)"/>
+  <path d="M0 455q140-28 257-2t223-15" fill="none" stroke="#c6e5e7" stroke-width="5" opacity=".45"/>
+  <path d="M0 535q168-54 300-21t180-1v97H0z" fill="#77776d" opacity=".58"/>
+  <g transform="translate(243 316)">
+    <path d="M-57 195h114l-11-22h-92z" fill="#867e69"/><path d="M-45 172h90l-10-20h-70z" fill="#b0a58c"/>
+    <path d="M-13 3q13-12 26 0l7 23-2 13 16 17-7 15-11-6 7 72 20 14H-43l20-14 7-72-11 6-7-15 16-17-2-13z" fill="url(#statue)" stroke="#adb2b1" stroke-width="3"/>
+    <ellipse cy="-13" rx="17" ry="24" fill="url(#statue)" stroke="#adb2b1" stroke-width="3"/>
+    <path d="M-21-26q20-25 42 0M-6-33v-14M6-33v-14M-31 45q31 18 62 0M-12 52q6 21 0 64M12 52q-6 21 0 64" fill="none" stroke="#adb2b1" stroke-width="3"/>
+  </g>
+  <path d="M0 560q110-38 204-6t276-13v69H0z" fill="#67828b" opacity=".5"/>
+</svg>

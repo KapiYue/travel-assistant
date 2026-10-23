@@ -1,0 +1,36 @@
+# Python virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# 可由 travel_rag_step1_index.py 随时重新生成的本地向量索引
+backend/weather_agent/travel_rag_chroma/
+
+# 本地学习资料：保留在工作区，不进入旅行助手仓库。
+# 只列出现有练习路径，避免误伤后续正式模块与测试。
+/python-basics/
+/backend/langgraph_basics/
+/backend/weather_agent/
+/docs/weather-agent.md
+/docs/travel-rag.md
+/docs/python-format-strings.md
+/docs/framework-learning-path.md
+/tests/README.md
+/tests/test_weather_agent.py
+/tests/test_context_state_demo.py
+/tests/test_travel_rag.py
+
+# 编辑器与系统文件
+.DS_Store
+.idea/
+.vscode/
