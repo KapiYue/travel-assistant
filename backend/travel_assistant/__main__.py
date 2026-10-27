@@ -17,6 +17,13 @@ from backend.travel_assistant.clarification import (
     ClarificationPlanError,
     create_clarification_plan,
 )
+from backend.travel_assistant.itinerary import (
+    ItineraryDraftError,
+    ItineraryModelConfigurationError,
+    ItineraryModelInvocationError,
+    ItineraryStructuredOutputError,
+    create_itinerary_draft,
+)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -53,16 +60,29 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(error)
         return 6
 
-    print(
-        json.dumps(
-            {
-                "travel_request": request.model_dump(mode="json"),
-                "clarification_plan": plan.model_dump(mode="json"),
-            },
-            ensure_ascii=False,
-            indent=2,
-        )
-    )
+    result: dict[str, object] = {
+        "travel_request": request.model_dump(mode="json"),
+        "clarification_plan": plan.model_dump(mode="json"),
+    }
+
+    if plan.is_complete:
+        try:
+            draft_or_plan = create_itinerary_draft(request)
+        except ItineraryDraftError as error:
+            print(error)
+            return 7
+        except ItineraryModelConfigurationError as error:
+            print(error)
+            return 8
+        except ItineraryModelInvocationError as error:
+            print(error)
+            return 9
+        except ItineraryStructuredOutputError as error:
+            print(error)
+            return 10
+        result["itinerary_draft"] = draft_or_plan.model_dump(mode="json")
+
+    print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
 
 
