@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import date, timedelta
+from typing import ClassVar
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, field_validator, model_validator
 
@@ -13,6 +14,120 @@ REQUIRED_REQUEST_FIELDS = (
     "traveler_count",
     "budget",
 )
+
+CLARIFICATION_QUESTIONS = {
+    "destination": (
+        "这次旅行想去哪个目的地？",
+        "需要确认本次旅行的目的地。",
+    ),
+    "start_date": (
+        "请问计划哪一年哪月哪日出发？请包含年份。",
+        "需要确认包含年份的出发日期，避免跨年歧义。",
+    ),
+    "days": (
+        "请问这次旅行计划玩几天？请提供大于 0 的整数。",
+        "需要确认旅行天数，且天数必须为大于 0 的整数。",
+    ),
+    "traveler_count": (
+        "请问这次一共几个人出行？",
+        "需要确认总出行人数；同行关系不能代表人数。",
+    ),
+    "budget": (
+        "请问这次旅行的预算大约是多少？也可以告诉我预算范围或档位。",
+        "需要确认预算金额、范围或档位，并保留原本表述。",
+    ),
+}
+
+
+class ClarificationQuestion(BaseModel):
+    """One program-generated question for a required but unknown field."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    field: str = Field(description="需要用户补充的旅行需求字段。")
+    prompt: str = Field(description="面向用户的清晰、礼貌中文追问。")
+    reason: str = Field(description="说明为何需要补充该字段的简短原因。")
+
+
+class ClarificationPlan(BaseModel):
+    """A deterministic, non-speculative plan for asking missing travel details.
+
+    Only ``missing_fields`` is accepted as input. The remaining fields are
+    derived by this model so callers cannot assert a false completion state or
+    attach arbitrary questions.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    missing_fields: list[str] = Field(
+        default_factory=list,
+        description="已校验旅行需求中仍缺失的必填字段，按固定顺序展示。",
+    )
+    questions: list[ClarificationQuestion] = Field(
+        default_factory=list,
+        description="由缺失字段确定性生成的中文追问。",
+    )
+    is_complete: bool = Field(
+        default=False,
+        description="当且仅当没有缺失必填字段时为 true。",
+    )
+    message: str = Field(
+        default="",
+        description="说明是否仍需补充信息的程序生成提示。",
+    )
+
+    _derived_fields: ClassVar[frozenset[str]] = frozenset(
+        {"questions", "is_complete", "message"}
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def reject_forged_derived_values(cls, value: object) -> object:
+        """Keep status and wording under program control rather than caller input."""
+        if isinstance(value, dict):
+            supplied = cls._derived_fields.intersection(value)
+            if supplied:
+                names = "、".join(sorted(supplied))
+                raise ValueError(f"{names} 必须由追问规则层计算，不能由调用方提供")
+        return value
+
+    @field_validator("missing_fields")
+    @classmethod
+    def validate_missing_fields(cls, values: list[str]) -> list[str]:
+        """Reject unknown or repeated fields and normalize to workflow order."""
+        unknown = [value for value in values if value not in REQUIRED_REQUEST_FIELDS]
+        if unknown:
+            raise ValueError("追问规则层收到未知缺失字段")
+        if len(values) != len(set(values)):
+            raise ValueError("追问规则层收到重复缺失字段")
+        return [field_name for field_name in REQUIRED_REQUEST_FIELDS if field_name in values]
+
+    @model_validator(mode="after")
+    def derive_plan(self) -> "ClarificationPlan":
+        """Derive all display fields from the validated missing-field list."""
+        object.__setattr__(
+            self,
+            "questions",
+            [
+                ClarificationQuestion(
+                    field=field_name,
+                    prompt=CLARIFICATION_QUESTIONS[field_name][0],
+                    reason=CLARIFICATION_QUESTIONS[field_name][1],
+                )
+                for field_name in self.missing_fields
+            ],
+        )
+        object.__setattr__(self, "is_complete", not self.missing_fields)
+        object.__setattr__(
+            self,
+            "message",
+            (
+                "信息已齐全，可以进入后续阶段。"
+                if self.is_complete
+                else "仍需补充以下旅行信息，补充后才能进入后续阶段。"
+            ),
+        )
+        return self
 
 
 class TravelRequestFields(BaseModel):

@@ -6,16 +6,17 @@ TaskFlow AI 是一个面向个人使用的 AI 旅行助手。它会把自然语�
 
 ## 当前进度
 
-已完成旅行助手的第一个正式闭环：**旅行需求提取**。
+已完成旅行助手的前两个连续步骤：**旅行需求提取**与**缺失信息追问计划**。当前已激活下一项工作：**可编辑的行程草案**。
 
 ```text
 自然语言旅行需求
   → Structured Output
   → Pydantic 校验
   → 缺失字段清单
+  → 程序生成追问计划
 ```
 
-该闭环只提取用户已明确表达的信息，不会猜测日期、人数、预算或偏好；不生成行程，也不调用天气、路线或价格等实时工具。下一阶段需要由用户明确激活；完整范围和验收记录见 [current-task.md](current-task.md)。
+已完成的闭环只提取用户已明确表达的信息，不会猜测日期、人数、预算或偏好；不生成行程，也不调用天气、路线或价格等实时工具。当前 Task 03 将在完整需求的前提下生成状态为 `draft` 的可编辑行程，不会把动态事实伪装成已确认结果。完整范围和验收记录见 [current-task.md](current-task.md)。
 
 ## 本地开发
 
@@ -33,7 +34,7 @@ TaskFlow AI 是一个面向个人使用的 AI 旅行助手。它会把自然语�
 python -m backend.travel_assistant "我和朋友两个人计划 2026 年 11 月 10 日去杭州玩 3 天，预算 5000 元。"
 ```
 
-程序会输出经 Pydantic 校验后的 JSON 和由程序计算的 `missing_fields`。实现职责说明见 [docs/travel-request-extraction.md](docs/travel-request-extraction.md)。
+程序会输出经 Pydantic 校验后的需求、由程序计算的 `missing_fields`，以及不带猜测的追问计划。实现职责说明见 [docs/travel-request-extraction.md](docs/travel-request-extraction.md) 和 [docs/travel-clarification.md](docs/travel-clarification.md)。
 
 ## 依赖与自动检查
 

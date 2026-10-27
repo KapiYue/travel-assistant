@@ -13,6 +13,10 @@ from backend.travel_assistant.extraction import (
     StructuredOutputValidationError,
     extract_travel_request,
 )
+from backend.travel_assistant.clarification import (
+    ClarificationPlanError,
+    create_clarification_plan,
+)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -43,7 +47,22 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(error)
         return 5
 
-    print(json.dumps(request.model_dump(mode="json"), ensure_ascii=False, indent=2))
+    try:
+        plan = create_clarification_plan(request)
+    except ClarificationPlanError as error:
+        print(error)
+        return 6
+
+    print(
+        json.dumps(
+            {
+                "travel_request": request.model_dump(mode="json"),
+                "clarification_plan": plan.model_dump(mode="json"),
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
     return 0
 
 
